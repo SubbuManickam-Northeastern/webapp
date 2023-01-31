@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class StatusController {
 
     @GetMapping("healthz")
-    public ResponseEntity getAppStatus() {
-        return new ResponseEntity(HttpStatus.OK);
+    public ResponseEntity<String> getAppStatus() {
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
