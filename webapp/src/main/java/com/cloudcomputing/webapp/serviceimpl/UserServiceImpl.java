@@ -141,7 +141,7 @@ public class UserServiceImpl implements UserService {
             return new ResponseEntity<>("Update Success", HttpStatus.NO_CONTENT);
 
         } catch(Exception e) {
-            return new ResponseEntity<>("Forbidden Access", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Unauthorized Access", HttpStatus.UNAUTHORIZED);
         }
     }
 
