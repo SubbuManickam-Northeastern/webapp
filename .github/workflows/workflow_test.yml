@@ -15,8 +15,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: '3.8.2'
+    steps:
+      - name: Set path to maven
+        id: mvn_path
+        run: |
+          echo "/opt/maven/bin" >> $GITHUB_ENV
       - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots package
+        run: mvn clean install
