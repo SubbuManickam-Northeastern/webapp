@@ -89,6 +89,7 @@ public class UserServiceImpl implements UserService {
 
             User loggedUser = userRepository.getByUserId(userId);
             if(!loggedUser.getUsername().equals(values[0])) {
+
                 return new ResponseEntity<>("Forbidden Access. Cannot access other users", HttpStatus.FORBIDDEN);
             }
 
