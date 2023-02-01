@@ -15,9 +15,5 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Set path to maven
-        id: mvn_path
-        run: |
-          echo "/opt/maven/bin" >> $GITHUB_ENV
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn -f D:\a\webapp\webapp\webapp\pom.xml
