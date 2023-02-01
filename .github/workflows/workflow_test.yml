@@ -16,4 +16,5 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build with Maven
-        run: mvn -f D:\a\webapp\webapp\webapp\pom.xml
+        run: cd webapp\
+        run: mvn clean install
