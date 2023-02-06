@@ -8,6 +8,7 @@ class WebappApplicationTests {
 
 	@Test
 	void contextLoads() {
+		assertEquals(new ResponseEntity<>(HttpStatus.OK), new ResponseEntity<>(HttpStatus.FORBIDDEN));
 	}
 
 }
