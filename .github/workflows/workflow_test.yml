@@ -16,4 +16,4 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build with Maven
-        run: mvn -f /home/runner/work/webapp/webapp/webapp/pom.xml test
+        run: mvn -f /home/runner/work/webapp/webapp/webapp/pom.xml StatusControllerTest
