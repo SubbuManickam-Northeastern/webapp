@@ -1,7 +1,7 @@
 package com.cloudcomputing.webapp;
 
 import com.cloudcomputing.webapp.controller.StatusController;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
