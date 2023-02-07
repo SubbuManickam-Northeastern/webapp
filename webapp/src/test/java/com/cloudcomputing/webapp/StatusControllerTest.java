@@ -14,6 +14,6 @@ public class StatusControllerTest {
     public void getStatusTest() {
         StatusController statusController = new StatusController();
         ResponseEntity status = statusController.getAppStatus();
-        assertEquals(new ResponseEntity<>(HttpStatus.OK), new ResponseEntity<>(HttpStatus.FORBIDDEN));
+        assertEquals(new ResponseEntity<>(HttpStatus.OK), status);
     }
 }
