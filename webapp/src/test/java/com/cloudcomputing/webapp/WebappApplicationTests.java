@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import com.cloudcomputing.webapp.controller.StatusController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import static org.junit.Assert.assertEquals;
 
 class WebappApplicationTests {
 
