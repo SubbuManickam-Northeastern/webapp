@@ -11,16 +11,10 @@ import static org.junit.Assert.assertEquals;
 @SpringBootTest
 class WebappApplicationTests {
 
-//	@Test
-//	void contextLoads() {
-//	}
-
 	@Test
-	public void getStatusTest() {
-// 		StatusController statusController = new StatusController();
-// 		ResponseEntity status = statusController.getAppStatus();
-// 		assertEquals(new ResponseEntity<>(HttpStatus.OK), status);
-		assertEquals(1+1,2);
+	void contextLoads() {
+		StatusController statusController = new StatusController();
+		ResponseEntity status = statusController.getAppStatus();
+		assertEquals(new ResponseEntity<>(HttpStatus.OK), status);
 	}
-
 }
