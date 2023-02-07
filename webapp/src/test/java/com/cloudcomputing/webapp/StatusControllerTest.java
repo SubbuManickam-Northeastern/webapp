@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 
 import static org.junit.Assert.assertEquals;
 
+@SpringBootTest
 public class StatusControllerTest {
 
     @Test
