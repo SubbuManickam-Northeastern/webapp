@@ -9,10 +9,6 @@ import static org.junit.Assert.assertEquals;
 
 class WebappApplicationTests {
 
-//	@Test
-//	void contextLoads() {
-//	}
-
 	@Test
 	public void getStatusTest() {
 		StatusController statusController = new StatusController();

@@ -15,7 +15,8 @@ public class ProductController {
     ProductService productService;
 
     @PostMapping
-    public ResponseEntity addProduct(@RequestBody ProductDetailsVO productDetails, @RequestHeader("Authorization") String header) {
+    public ResponseEntity addProduct(@RequestBody ProductDetailsVO productDetails,
+                                     @RequestHeader("Authorization") String header) {
         ResponseEntity productData = productService.addProduct(productDetails, header);
         return productData;
     }
@@ -27,8 +28,24 @@ public class ProductController {
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity deleteProduct(@PathVariable("productId") Integer productId, @RequestHeader("Authorization") String header) {
+    public ResponseEntity deleteProduct(@PathVariable("productId") Integer productId,
+                                        @RequestHeader("Authorization") String header) {
         ResponseEntity deletedProduct = productService.deleteProduct(productId, header);
         return deletedProduct;
     }
+
+    @PutMapping("/{productId}")
+    public ResponseEntity updateProductPut(@PathVariable("productId") Integer productId,
+                                           @RequestHeader("Authorization") String header, @RequestBody ProductDetailsVO productDetails) {
+        ResponseEntity updatedProduct = productService.updateProductPut(productId, header, productDetails);
+        return updatedProduct;
+    }
+
+    @PatchMapping("/{productId}")
+    public ResponseEntity updateProductPatch(@PathVariable("productId") Integer productId,
+                                             @RequestHeader("Authorization") String header, @RequestBody ProductDetailsVO productDetails) {
+        ResponseEntity updatedProduct = productService.updateProductPatch(productId, header, productDetails);
+        return updatedProduct;
+    }
+
 }

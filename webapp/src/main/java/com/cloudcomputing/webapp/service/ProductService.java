@@ -10,4 +10,8 @@ public interface ProductService {
     ResponseEntity getProduct(Integer productId);
 
     ResponseEntity deleteProduct(Integer productId, String header);
+
+    ResponseEntity updateProductPut(Integer productId, String header, ProductDetailsVO productDetails);
+
+    ResponseEntity updateProductPatch(Integer productId, String header, ProductDetailsVO productDetails);
 }
