@@ -164,11 +164,16 @@ public class ProductServiceImpl implements ProductService {
                 return new ResponseEntity<>("Forbidden Access. Only owners can update products", HttpStatus.FORBIDDEN);
             }
 
+            if(productDetails.getQuantity() == null || productDetails.getSku() == null || productDetails.getDescription() == null
+            || productDetails.getName() == null || productDetails.getManufacturer() == null) {
+                return new ResponseEntity<>("Bad Request. Enter all fields for updating", HttpStatus.BAD_REQUEST);
+            }
+
             if(!selectedProduct.getSku().equals(productDetails.getSku())) {
                 return new ResponseEntity<>("Bad Request. SKU cannot be updated", HttpStatus.BAD_REQUEST);
             }
 
-            if(productDetails.getQuantity() != null && productDetails.getQuantity() < 0) {
+            if(productDetails.getQuantity() < 0) {
                 return new ResponseEntity<>("Bad Request. Enter valid quantity", HttpStatus.BAD_REQUEST);
             }
 
@@ -222,11 +227,21 @@ public class ProductServiceImpl implements ProductService {
 
             String updateDate = String.valueOf(java.time.LocalDateTime.now());
 
-            selectedProduct.setName(productDetails.getName());
-            selectedProduct.setSku(productDetails.getSku());
-            selectedProduct.setDescription(productDetails.getDescription());
-            selectedProduct.setManufacturer(productDetails.getManufacturer());
-            selectedProduct.setQuantity(productDetails.getQuantity());
+            if(productDetails.getName() != null) {
+                selectedProduct.setName(productDetails.getName());
+            }
+            if(productDetails.getSku() != null) {
+                selectedProduct.setSku(productDetails.getSku());
+            }
+            if(productDetails.getDescription() != null) {
+                selectedProduct.setDescription(productDetails.getDescription());
+            }
+            if(productDetails.getManufacturer() != null) {
+                selectedProduct.setManufacturer(productDetails.getManufacturer());
+            }
+            if(productDetails.getQuantity() != null) {
+                selectedProduct.setQuantity(productDetails.getQuantity());
+            }
             selectedProduct.setDateLastUpdated(updateDate);
             productRepository.save(selectedProduct);
 
