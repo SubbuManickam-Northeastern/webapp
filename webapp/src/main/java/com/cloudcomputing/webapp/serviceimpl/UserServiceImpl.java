@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
             String[] values = authenticateUser(header);
 
             User authUser = userRepository.getByUsername(values[0]);
-            if(!encoder.matches(values[1], authUser.getPassword())) {
+            if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
                 return new ResponseEntity<>("Unauthorized Access. Enter valid credentials", HttpStatus.UNAUTHORIZED);
             }
 
@@ -116,11 +116,15 @@ public class UserServiceImpl implements UserService {
             String[] values = authenticateUser(header);
 
             User authUser = userRepository.getByUsername(values[0]);
-            if(!encoder.matches(values[1], authUser.getPassword())) {
+            if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
                 return new ResponseEntity<>("Unauthorized Access. Enter valid credentials", HttpStatus.UNAUTHORIZED);
             }
 
             User loggedUser = userRepository.getByUserId(userId);
+            if(loggedUser == null) {
+                return new ResponseEntity<>("Not Found. Enter valid user id", HttpStatus.NOT_FOUND);
+            }
+
             if(!loggedUser.getUsername().equals(values[0])) {
                 return new ResponseEntity<>("Forbidden Access", HttpStatus.FORBIDDEN);
             }

@@ -42,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
 
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
-                return new ResponseEntity<>("Bad Request. Only valid users can create a product", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Unauthorized. Only valid users can create a product", HttpStatus.UNAUTHORIZED);
             }
 
             if(existingSkus.contains(productDetails.getSku())) {
@@ -90,7 +90,7 @@ public class ProductServiceImpl implements ProductService {
             Product product = productRepository.getByProductId(productId);
 
             if(product == null) {
-                return new ResponseEntity<>("Product not found. Enter a valid Product Id", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Product not found. Enter a valid Product Id", HttpStatus.NOT_FOUND);
             }
 
             selectedProduct.setId(product.getId());
@@ -138,6 +138,102 @@ public class ProductServiceImpl implements ProductService {
 
         } catch(Exception e) {
             return new ResponseEntity<>("Bad Request" + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity updateProductPut(Integer productId, String header, ProductDetailsVO productDetails) {
+
+        try {
+
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
+            Product selectedProduct = productRepository.getByProductId(productId);
+            String[] values = userService.authenticateUser(header);
+
+            User authUser = userRepository.getByUsername(values[0]);
+            if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                return new ResponseEntity<>("Unauthorized Access. Enter valid credentials", HttpStatus.UNAUTHORIZED);
+            }
+
+            if(selectedProduct == null) {
+                return new ResponseEntity<>("Product not found. Enter a valid Product Id", HttpStatus.NOT_FOUND);
+            }
+
+            User loggedUser = userRepository.getByUserId(selectedProduct.getOwnerUserId());
+            if(!loggedUser.getUsername().equals(values[0])) {
+                return new ResponseEntity<>("Forbidden Access. Only owners can update products", HttpStatus.FORBIDDEN);
+            }
+
+            if(!selectedProduct.getSku().equals(productDetails.getSku())) {
+                return new ResponseEntity<>("Bad Request. SKU cannot be updated", HttpStatus.BAD_REQUEST);
+            }
+
+            if(productDetails.getQuantity() != null && productDetails.getQuantity() < 0) {
+                return new ResponseEntity<>("Bad Request. Enter valid quantity", HttpStatus.BAD_REQUEST);
+            }
+
+            String updateDate = String.valueOf(java.time.LocalDateTime.now());
+
+            selectedProduct.setName(productDetails.getName());
+            selectedProduct.setSku(productDetails.getSku());
+            selectedProduct.setDescription(productDetails.getDescription());
+            selectedProduct.setManufacturer(productDetails.getManufacturer());
+            selectedProduct.setQuantity(productDetails.getQuantity());
+            selectedProduct.setDateLastUpdated(updateDate);
+            productRepository.save(selectedProduct);
+
+            return new ResponseEntity<>("Product Updated", HttpStatus.NO_CONTENT);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity updateProductPatch(Integer productId, String header, ProductDetailsVO productDetails) {
+
+        try {
+
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
+            Product selectedProduct = productRepository.getByProductId(productId);
+            String[] values = userService.authenticateUser(header);
+
+            User authUser = userRepository.getByUsername(values[0]);
+            if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                return new ResponseEntity<>("Unauthorized Access. Enter valid credentials", HttpStatus.UNAUTHORIZED);
+            }
+
+            if(selectedProduct == null) {
+                return new ResponseEntity<>("Product not found. Enter a valid Product Id", HttpStatus.NOT_FOUND);
+            }
+
+            User loggedUser = userRepository.getByUserId(selectedProduct.getOwnerUserId());
+            if(!loggedUser.getUsername().equals(values[0])) {
+                return new ResponseEntity<>("Forbidden Access. Only owners can update products", HttpStatus.FORBIDDEN);
+            }
+
+            if(!selectedProduct.getSku().equals(productDetails.getSku())) {
+                return new ResponseEntity<>("Bad Request. SKU cannot be updated", HttpStatus.BAD_REQUEST);
+            }
+
+            if(productDetails.getQuantity() != null && productDetails.getQuantity() < 0) {
+                return new ResponseEntity<>("Bad Request. Enter valid quantity", HttpStatus.BAD_REQUEST);
+            }
+
+            String updateDate = String.valueOf(java.time.LocalDateTime.now());
+
+            selectedProduct.setName(productDetails.getName());
+            selectedProduct.setSku(productDetails.getSku());
+            selectedProduct.setDescription(productDetails.getDescription());
+            selectedProduct.setManufacturer(productDetails.getManufacturer());
+            selectedProduct.setQuantity(productDetails.getQuantity());
+            selectedProduct.setDateLastUpdated(updateDate);
+            productRepository.save(selectedProduct);
+
+            return new ResponseEntity<>("Product Updated", HttpStatus.NO_CONTENT);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
         }
     }
 }
