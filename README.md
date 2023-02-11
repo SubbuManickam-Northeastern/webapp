@@ -13,6 +13,7 @@ Type "mvn clean install"
 Steps to run the app:
 Once the jar file is built, open cmd and type "java -jar /jar_file_path"
 
+Demo
 Pre-requisites:
 Local MySQL database with appropriate credentials
 Java and Maven with appropriate versions
