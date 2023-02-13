@@ -45,6 +45,11 @@ public class ProductServiceImpl implements ProductService {
                 return new ResponseEntity<>("Unauthorized. Only valid users can create a product", HttpStatus.UNAUTHORIZED);
             }
 
+            if(productDetails.getQuantity() == null || productDetails.getSku() == null || productDetails.getDescription() == null
+                    || productDetails.getName() == null || productDetails.getManufacturer() == null) {
+                return new ResponseEntity<>("Bad Request. Enter all required fields for creating", HttpStatus.BAD_REQUEST);
+            }
+
             if(existingSkus.contains(productDetails.getSku())) {
                 return new ResponseEntity<>("Bad Request. Enter unique SKU", HttpStatus.BAD_REQUEST);
             }
@@ -149,6 +154,7 @@ public class ProductServiceImpl implements ProductService {
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
             Product selectedProduct = productRepository.getByProductId(productId);
             String[] values = userService.authenticateUser(header);
+            List<String> existingSkus = productRepository.getSkus();
 
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
@@ -169,8 +175,8 @@ public class ProductServiceImpl implements ProductService {
                 return new ResponseEntity<>("Bad Request. Enter all fields for updating", HttpStatus.BAD_REQUEST);
             }
 
-            if(!selectedProduct.getSku().equals(productDetails.getSku())) {
-                return new ResponseEntity<>("Bad Request. SKU cannot be updated", HttpStatus.BAD_REQUEST);
+            if(existingSkus.contains(productDetails.getSku())) {
+                return new ResponseEntity<>("Bad Request. Enter unique SKU", HttpStatus.BAD_REQUEST);
             }
 
             if(productDetails.getQuantity() < 0) {
@@ -202,6 +208,7 @@ public class ProductServiceImpl implements ProductService {
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
             Product selectedProduct = productRepository.getByProductId(productId);
             String[] values = userService.authenticateUser(header);
+            List<String> existingSkus = productRepository.getSkus();
 
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
@@ -217,8 +224,8 @@ public class ProductServiceImpl implements ProductService {
                 return new ResponseEntity<>("Forbidden Access. Only owners can update products", HttpStatus.FORBIDDEN);
             }
 
-            if(!selectedProduct.getSku().equals(productDetails.getSku())) {
-                return new ResponseEntity<>("Bad Request. SKU cannot be updated", HttpStatus.BAD_REQUEST);
+            if(existingSkus.contains(productDetails.getSku())) {
+                return new ResponseEntity<>("Bad Request. Enter unique SKU", HttpStatus.BAD_REQUEST);
             }
 
             if(productDetails.getQuantity() != null && productDetails.getQuantity() < 0) {
