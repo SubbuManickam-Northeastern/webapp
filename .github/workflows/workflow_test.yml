@@ -22,8 +22,5 @@ jobs:
         uses: mirromutth/mysql-action@v1.1
         with:
           host port: 3306
-          mysql database: 'webapp_cloud'
-          mysql user: 'root'
-          mysql password: 'Avengers2232@'
       - name: Build with Maven
         run: mvn -f /home/runner/work/webapp/webapp/webapp/pom.xml clean install
