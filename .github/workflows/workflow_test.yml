@@ -55,8 +55,8 @@ jobs:
           command: validate
           target: ami-config.pkr.hcl
 
-      - uses: hashicorp/packer-github-actions@master
-        with:
-          command: build
-          arguments: -var=AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} -var=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          target: ami-config.pkr.hcl
+      # - uses: hashicorp/packer-github-actions@master
+      #   with:
+      #     command: build
+      #     arguments: -var=AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} -var=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     target: ami-config.pkr.hcl
