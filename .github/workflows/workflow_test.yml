@@ -18,22 +18,17 @@ jobs:
       - name: Shutdown Ubuntu MySQL (SUDO)
         run: sudo service mysql stop
 
-      - name: Write value to Properties-file
-        uses: christian-draeger/write-properties@1.1.0
+      - name: Write Properties file
+        uses: DamianReeves/write-file-action@master
         with:
           path: './webapp/src/main/resources/application.properties'
-          property: |
-            'server.port'
-            'spring.datasource.url'
-            'spring.datasource.username'
-            'spring.datasource.password'
-            'spring.datasource.driver-class-name'
-          value: |
-            ${{ secrets.SERVER_PORT }}
-            ${{ secrets.DATASOURCE_URL }}
-            ${{ secrets.DB_USERNAME }}
-            ${{ secrets.DB_PASSWORD }}
-            ${{ secrets.DRIVER_CLASS }}
+          contents: |
+            server.port=${{ secrets.SERVER_PORT }}
+            spring.datasource.url=${{ secrets.DATASOURCE_URL }}
+            spring.datasource.username=${{ secrets.DB_USERNAME }}
+            spring.datasource.password=${{ secrets.DB_PASSWORD }}
+            spring.datasource.driver-class-name=${{ secrets.DRIVER_CLASS }}
+          write-mode: append
       
       - name: Set up MySQL
         uses: mirromutth/mysql-action@v1.1
