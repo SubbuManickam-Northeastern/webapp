@@ -19,6 +19,10 @@ variable "ami_users" {
   default = ["332779329231"]
 }
 
+variable "token" {
+  default = "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"
+}
+
 locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 }
@@ -37,10 +41,19 @@ build {
     "source.amazon-ebs.ec2-ami"
   ]
 
+  provisioner "github" {
+    type = "github"
+    asset = "target/webapp-0.0.1-SNAPSHOT.jar"
+    owner = "SubbuManickam"
+    repo = "webapp"
+    token = var.token
+    download_directory = "/tmp"
+  }
+
   # provisioner "file" {
-  #   # source = "/home/runner/work/webapp/webapp/webapp/target/webapp-0.0.1-SNAPSHOT.jar"
-  #   source = "build /workspace/target/*jar-with-dependencies.jar webapp-0.0.1-SNAPSHOT.jar"
-  #   # source = "./webapp/target/webapp-0.0.1-SNAPSHOT.jar"
+    # source = "/home/runner/work/webapp/webapp/webapp/target/webapp-0.0.1-SNAPSHOT.jar"
+    # source = "build /workspace/target/*jar-with-dependencies.jar webapp-0.0.1-SNAPSHOT.jar"
+    source = "/tmp/webapp-0.0.1-SNAPSHOT.jar"
   #   destination = "/tmp/webapp-0.0.1-SNAPSHOT.jar"
   # }
 
