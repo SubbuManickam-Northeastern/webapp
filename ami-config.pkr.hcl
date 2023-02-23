@@ -19,6 +19,16 @@ variable "ami_users" {
   default = ["332779329231"]
 }
 
+variable "AWS_ACCESS_KEY" {
+  type = string
+  default = ""
+}
+
+variable "AWS_SECRET_ACCESS_KEY" {
+  type = string
+  default = ""
+}
+
 locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 }
@@ -30,6 +40,8 @@ source "amazon-ebs" "ec2-ami" {
   region = var.region
   ssh_username = "ec2-user"
   ami_users = var.ami_users
+  access_key = var.AWS_ACCESS_KEY
+  secret_key = var.AWS_SECRET_ACCESS_KEY
 }
 
 build {
