@@ -17,14 +17,31 @@ jobs:
           distribution: 'temurin'
       - name: Shutdown Ubuntu MySQL (SUDO)
         run: sudo service mysql stop
+
+      - name: Write value to Properties-file
+        uses: christian-draeger/write-properties@1.1.0
+        with:
+          path: './src/main/resources/application.properties'
+          property: |
+            'server.port'
+            'spring.datasource.url'
+            'spring.datasource.username'
+            'spring.datasource.password'
+            'spring.datasource.driver-class-name'
+          value: |
+            ${{ secrets.SERVER_PORT }}
+            ${{ secrets.DATASOURCE_URL }}
+            ${{ secrets.DB_USERNAME }}
+            ${{ secrets.DB_PASSWORD }}
+            ${{ secrets.DRIVER_CLASS }}
       
       - name: Set up MySQL
         uses: mirromutth/mysql-action@v1.1
         with:
-          host port: 3306
-          mysql database: 'webapp_cloud'
-          mysql user: 'root'
-          mysql password: 'Avengers2232@'
+          host port: ${{ secrets.SQL_HOST_PORT }}
+          mysql database: ${{ secrets.DB_NAME }}
+          mysql user: ${{ secrets.DB_USERNAME }}
+          mysql password: ${{ secrets.DB_PASSWORD }}
           
       - name: Build with Maven
         run: mvn -f /home/runner/work/webapp/webapp/webapp/pom.xml clean install
