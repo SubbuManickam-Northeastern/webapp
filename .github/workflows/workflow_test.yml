@@ -28,6 +28,8 @@ jobs:
             spring.datasource.username=${{ secrets.DB_USERNAME }}
             spring.datasource.password=${{ secrets.DB_PASSWORD }}
             spring.datasource.driver-class-name=${{ secrets.DRIVER_CLASS }}
+            spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
+            spring.jpa.hibernate.ddl-auto=update
           write-mode: append
       
       - name: Set up MySQL
