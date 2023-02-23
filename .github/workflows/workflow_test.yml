@@ -21,7 +21,7 @@ jobs:
       - name: Write value to Properties-file
         uses: christian-draeger/write-properties@1.1.0
         with:
-          path: './src/main/resources/application.properties'
+          path: '/home/runner/work/webapp/webapp/webapp/src/main/resources/application.properties'
           property: |
             'server.port'
             'spring.datasource.url'
