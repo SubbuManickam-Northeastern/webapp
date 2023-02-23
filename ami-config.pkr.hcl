@@ -50,12 +50,12 @@ build {
     download_directory = "/tmp"
   }
 
-  # provisioner "file" {
+  provisioner "file" {
     # source = "/home/runner/work/webapp/webapp/webapp/target/webapp-0.0.1-SNAPSHOT.jar"
     # source = "build /workspace/target/*jar-with-dependencies.jar webapp-0.0.1-SNAPSHOT.jar"
     source = "/tmp/webapp-0.0.1-SNAPSHOT.jar"
-  #   destination = "/tmp/webapp-0.0.1-SNAPSHOT.jar"
-  # }
+    destination = "/tmp/webapp-0.0.1-SNAPSHOT.jar"
+  }
 
   provisioner "file" {
     source = "./java_app.service"
