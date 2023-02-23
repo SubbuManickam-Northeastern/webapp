@@ -29,6 +29,13 @@ jobs:
       - name: Build with Maven
         run: mvn -f /home/runner/work/webapp/webapp/webapp/pom.xml clean install
 
+      - name: Package jar
+        run: mkdir staging && cp target/*jar-with-dependencies.jar staging
+         uses: actions/upload-artifact@v1
+          with:
+            name: Package
+            path: staging
+
       - name: Packer Init
         uses: hashicorp/packer-github-actions@master
         with:
