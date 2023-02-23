@@ -12,6 +12,39 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Shutdown Ubuntu MySQL (SUDO)
+        run: sudo service mysql stop
+
+      - name: Write Properties file
+        uses: DamianReeves/write-file-action@master
+        with:
+          path: './webapp/src/main/resources/application.properties'
+          contents: |
+            server.port=${{ secrets.SERVER_PORT }}
+            spring.datasource.url=${{ secrets.DATASOURCE_URL }}
+            spring.datasource.username=${{ secrets.DB_USERNAME }}
+            spring.datasource.password=${{ secrets.DB_PASSWORD }}
+            spring.datasource.driver-class-name=${{ secrets.DRIVER_CLASS }}
+            spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
+            spring.jpa.hibernate.ddl-auto=update
+          write-mode: append
+      
+      - name: Set up MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          host port: ${{ secrets.SQL_HOST_PORT }}
+          mysql database: ${{ secrets.DB_NAME }}
+          mysql user: ${{ secrets.DB_USERNAME }}
+          mysql password: ${{ secrets.DB_PASSWORD }}
+          
+      - name: Build with Maven
+        run: mvn -f /home/runner/work/webapp/webapp/webapp/pom.xml clean install
+
       - name: Packer Init
         uses: hashicorp/packer-github-actions@master
         with:
