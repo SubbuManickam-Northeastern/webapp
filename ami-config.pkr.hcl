@@ -37,12 +37,12 @@ build {
     "source.amazon-ebs.ec2-ami"
   ]
 
-  provisioner "file" {
-    # source = "/home/runner/work/webapp/webapp/webapp/target/webapp-0.0.1-SNAPSHOT.jar"
-    source = "/workspace/target/*jar-with-dependencies.jar webapp-0.0.1-SNAPSHOT.jar"
-    # source = "./webapp/target/webapp-0.0.1-SNAPSHOT.jar"
-    destination = "/tmp/webapp-0.0.1-SNAPSHOT.jar"
-  }
+  # provisioner "file" {
+  #   # source = "/home/runner/work/webapp/webapp/webapp/target/webapp-0.0.1-SNAPSHOT.jar"
+  #   source = "build /workspace/target/*jar-with-dependencies.jar webapp-0.0.1-SNAPSHOT.jar"
+  #   # source = "./webapp/target/webapp-0.0.1-SNAPSHOT.jar"
+  #   destination = "/tmp/webapp-0.0.1-SNAPSHOT.jar"
+  # }
 
   provisioner "file" {
     source = "./java_app.service"
