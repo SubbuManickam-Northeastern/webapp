@@ -55,7 +55,6 @@ jobs:
           command: validate
           target: ami-config.pkr.hcl
 
-
       # - uses: hashicorp/packer-github-actions@master
       #   with:
       #     command: build
