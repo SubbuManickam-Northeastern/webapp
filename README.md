@@ -16,3 +16,5 @@ Once the jar file is built, open cmd and type "java -jar /jar_file_path"
 Pre-requisites:
 Local MySQL database with appropriate credentials
 Java and Maven with appropriate versions
+
+App Testing
