@@ -76,4 +76,3 @@ build {
   provisioner "shell" {
     script = "./ami_setup.sh"
   }
-}
