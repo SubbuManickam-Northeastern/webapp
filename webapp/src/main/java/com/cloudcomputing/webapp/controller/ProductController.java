@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(value = "/v1/product", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -48,4 +49,30 @@ public class ProductController {
         return updatedProduct;
     }
 
+    @PostMapping("/{productId}/image")
+    public ResponseEntity uploadImage(@PathVariable("productId") Integer productId, @RequestHeader("Authorization") String header,
+                                      @RequestParam("file") MultipartFile productImage) {
+        ResponseEntity uploadedImage = productService.uploadImage(productId, header, productImage);
+        return uploadedImage;
+    }
+
+    @GetMapping("/{productId}/image")
+    public ResponseEntity fetchImageList(@PathVariable("productId") Integer productId, @RequestHeader("Authorization") String header) {
+        ResponseEntity imageList = productService.fetchImageList(productId, header);
+        return imageList;
+    }
+
+    @GetMapping("/{productId}/image/{imageId}")
+    public ResponseEntity fetchImageDetails(@PathVariable("productId") Integer productId, @PathVariable("imageId") Integer imageId,
+                                            @RequestHeader("Authorization") String header) {
+        ResponseEntity imageDetails = productService.fetchImageDetails(productId, imageId, header);
+        return imageDetails;
+    }
+
+    @DeleteMapping("/{productId}/image/{imageId}")
+    public ResponseEntity deleteImage(@PathVariable("productId") Integer productId, @PathVariable("imageId") Integer imageId,
+                                      @RequestHeader("Authorization") String header) {
+        ResponseEntity deletedImage = productService.deleteImage(productId, imageId, header);
+        return deletedImage;
+    }
 }
