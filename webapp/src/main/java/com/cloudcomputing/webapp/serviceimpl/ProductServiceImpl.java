@@ -52,18 +52,6 @@ public class ProductServiceImpl implements ProductService {
 
     AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
 
-//    AWSCredentials credentials = new BasicAWSCredentials(
-//            "AKIATXYHHWIKKWHC5QT6",
-//            "sDsVnBMakSMU9ZtyH41h0IJcuVZ2UlW4e0WiC1qV"
-//    );
-//
-//    AmazonS3 s3Client = AmazonS3ClientBuilder
-//            .standard()
-//            .withCredentials(new AWSStaticCredentialsProvider(credentials))
-//            .withRegion(Regions.US_EAST_1)
-//            .build();
-
-
     @Override
     public ResponseEntity addProduct(ProductDetailsVO productDetails, String header) {
 
@@ -176,9 +164,11 @@ public class ProductServiceImpl implements ProductService {
             }
 
             List<Image> relatedImages = imageRepository.getImageListByProduct(productId);
-            for(Image image : relatedImages) {
-                s3Client.deleteObject(new DeleteObjectRequest(s3bucketName, image.getS3BucketPath()));
-                imageRepository.deleteById(image.getImageId());
+            if(!relatedImages.isEmpty()) {
+                for (Image image : relatedImages) {
+                    s3Client.deleteObject(new DeleteObjectRequest(s3bucketName, image.getS3BucketPath()));
+                    imageRepository.deleteById(image.getImageId());
+                }
             }
 
             productRepository.deleteById(productId);
