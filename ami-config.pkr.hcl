@@ -19,13 +19,21 @@ variable "ami_users" {
   default = ["332779329231"]
 }
 
+variable "ssh_username" {
+  default = "ec2-user"
+}
+
+variable "instance_type" {
+  default = "t2.micro"
+}
+
 variable "AWS_ACCESS_KEY" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "AWS_SECRET_ACCESS_KEY" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -34,14 +42,14 @@ locals {
 }
 
 source "amazon-ebs" "ec2-ami" {
-  ami_name = "ec2-ami-${local.timestamp}"
-  source_ami = var.source_ami
-  instance_type = "t2.micro"
-  region = var.region
-  ssh_username = "ec2-user"
-  ami_users = var.ami_users
-  access_key = var.AWS_ACCESS_KEY
-  secret_key = var.AWS_SECRET_ACCESS_KEY
+  ami_name      = "ec2-ami-${local.timestamp}"
+  source_ami    = var.source_ami
+  instance_type = var.instance_type
+  region        = var.region
+  ssh_username  = var.ssh_username
+  ami_users     = var.ami_users
+  access_key    = var.AWS_ACCESS_KEY
+  secret_key    = var.AWS_SECRET_ACCESS_KEY
 }
 
 build {
@@ -50,12 +58,12 @@ build {
   ]
 
   provisioner "file" {
-    source = "./webapp/target/webapp-0.0.1-SNAPSHOT.jar"
+    source      = "./webapp/target/webapp-0.0.1-SNAPSHOT.jar"
     destination = "/tmp/webapp-0.0.1-SNAPSHOT.jar"
   }
 
   provisioner "file" {
-    source = "./java_app.service"
+    source      = "./java_app.service"
     destination = "/tmp/java_app.service"
   }
 
@@ -65,6 +73,8 @@ build {
       "sudo mkdir -p webapp",
       "sudo chmod 755 webapp",
       "cd /tmp",
+      "sudo touch userdata.properties",
+      "sudo chmod 755 userdata.properties",
       "sudo mv webapp-0.0.1-SNAPSHOT.jar ~/webapp",
       "sudo mv java_app.service /etc/systemd/system",
       "cd ~/webapp",
