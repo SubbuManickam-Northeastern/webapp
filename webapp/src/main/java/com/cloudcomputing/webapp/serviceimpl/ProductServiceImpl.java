@@ -59,8 +59,12 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product();
 
         try {
-            String currentDate = String.valueOf(java.time.LocalDateTime.now());
 
+            if(header == null || header.isBlank()) {
+                return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
+            }
+
+            String currentDate = String.valueOf(java.time.LocalDateTime.now());
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
             String[] values = userService.authenticateUser(header);
             List<String> existingSkus = productRepository.getSkus();
@@ -70,8 +74,11 @@ public class ProductServiceImpl implements ProductService {
                 return new ResponseEntity<>("Unauthorized. Only valid users can create a product", HttpStatus.UNAUTHORIZED);
             }
 
-            if(productDetails.getQuantity() == null || productDetails.getSku() == null || productDetails.getDescription() == null
-                    || productDetails.getName() == null || productDetails.getManufacturer() == null) {
+            if(productDetails.getQuantity() == null || productDetails.getSku().isBlank() ||
+                    productDetails.getDescription().isBlank() || productDetails.getName().isBlank() ||
+                    productDetails.getManufacturer().isBlank() || productDetails.getSku() == null ||
+                    productDetails.getDescription() == null || productDetails.getName() == null ||
+                    productDetails.getManufacturer() == null) {
                 return new ResponseEntity<>("Bad Request. Enter all required fields for creating", HttpStatus.BAD_REQUEST);
             }
 
@@ -79,7 +86,7 @@ public class ProductServiceImpl implements ProductService {
                 return new ResponseEntity<>("Bad Request. Enter unique SKU", HttpStatus.BAD_REQUEST);
             }
 
-            if(productDetails.getQuantity() < 0) {
+            if(productDetails.getQuantity() < 0 || productDetails.getQuantity() > 100) {
                 return new ResponseEntity<>("Bad Request. Enter valid quantity", HttpStatus.BAD_REQUEST);
             }
 
@@ -144,6 +151,11 @@ public class ProductServiceImpl implements ProductService {
     public ResponseEntity deleteProduct(Integer productId, String header) {
 
         try {
+
+            if(header == null || header.isBlank()) {
+                return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
+            }
+
             String s3bucketName = s3Configuration.getBucketName();
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
             Product selectedProduct = productRepository.getByProductId(productId);
@@ -185,6 +197,10 @@ public class ProductServiceImpl implements ProductService {
 
         try {
 
+            if(header == null || header.isBlank()) {
+                return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
+            }
+
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
             Product selectedProduct = productRepository.getByProductId(productId);
             String[] values = userService.authenticateUser(header);
@@ -204,8 +220,11 @@ public class ProductServiceImpl implements ProductService {
                 return new ResponseEntity<>("Forbidden Access. Only owners can update products", HttpStatus.FORBIDDEN);
             }
 
-            if(productDetails.getQuantity() == null || productDetails.getSku() == null || productDetails.getDescription() == null
-            || productDetails.getName() == null || productDetails.getManufacturer() == null) {
+            if(productDetails.getQuantity() == null || productDetails.getSku().isBlank() ||
+                    productDetails.getDescription().isBlank() || productDetails.getName().isBlank() ||
+                    productDetails.getManufacturer().isBlank() || productDetails.getSku() == null ||
+                    productDetails.getDescription() == null || productDetails.getName() == null ||
+                    productDetails.getManufacturer() == null) {
                 return new ResponseEntity<>("Bad Request. Enter all fields for updating", HttpStatus.BAD_REQUEST);
             }
 
@@ -213,7 +232,7 @@ public class ProductServiceImpl implements ProductService {
                 return new ResponseEntity<>("Bad Request. Enter unique SKU", HttpStatus.BAD_REQUEST);
             }
 
-            if(productDetails.getQuantity() < 0) {
+            if(productDetails.getQuantity() < 0 || productDetails.getQuantity() > 100) {
                 return new ResponseEntity<>("Bad Request. Enter valid quantity", HttpStatus.BAD_REQUEST);
             }
 
@@ -239,6 +258,10 @@ public class ProductServiceImpl implements ProductService {
 
         try {
 
+            if(header == null || header.isBlank()) {
+                return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
+            }
+
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
             Product selectedProduct = productRepository.getByProductId(productId);
             String[] values = userService.authenticateUser(header);
@@ -262,7 +285,7 @@ public class ProductServiceImpl implements ProductService {
                 return new ResponseEntity<>("Bad Request. Enter unique SKU", HttpStatus.BAD_REQUEST);
             }
 
-            if(productDetails.getQuantity() != null && productDetails.getQuantity() < 0) {
+            if(productDetails.getQuantity() != null && (productDetails.getQuantity() < 0 || productDetails.getQuantity() > 100)) {
                 return new ResponseEntity<>("Bad Request. Enter valid quantity", HttpStatus.BAD_REQUEST);
             }
 
@@ -298,6 +321,10 @@ public class ProductServiceImpl implements ProductService {
 
         try {
 
+            if(header == null || header.isBlank()) {
+                return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
+            }
+
             String s3bucketName = s3Configuration.getBucketName();
             String currentDate = String.valueOf(java.time.LocalDateTime.now());
 
@@ -321,15 +348,6 @@ public class ProductServiceImpl implements ProductService {
             String path = authUser.getId() + "/" + productId + "/" + fileName;
             List<String> paths = imageRepository.getPaths();
 
-            InputStream inputStream = productImage.getInputStream();
-
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentLength(productImage.getSize());
-            metadata.setContentType(productImage.getContentType());
-
-            PutObjectRequest putObjectRequest = new PutObjectRequest(s3bucketName, path, inputStream, metadata);
-            s3Client.putObject(putObjectRequest);
-
             image.setProductId(productId);
             image.setFileName(fileName);
             image.setDateCreated(currentDate);
@@ -337,6 +355,18 @@ public class ProductServiceImpl implements ProductService {
             imageRepository.save(image);
 
             Image uplodedImage = imageRepository.getByPath(path);
+
+            InputStream inputStream = productImage.getInputStream();
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(productImage.getSize());
+            metadata.setContentType(productImage.getContentType());
+            metadata.addUserMetadata("id", String.valueOf(productId));
+            metadata.addUserMetadata("fileName", fileName);
+            metadata.addUserMetadata("path", path);
+
+            PutObjectRequest putObjectRequest = new PutObjectRequest(s3bucketName, path, inputStream, metadata);
+            s3Client.putObject(putObjectRequest);
+
             imageDetails.setImageId(uplodedImage.getImageId());
             imageDetails.setProductId(uplodedImage.getProductId());
             imageDetails.setFileName(uplodedImage.getFileName());
@@ -354,6 +384,10 @@ public class ProductServiceImpl implements ProductService {
     public ResponseEntity fetchImageList(Integer productId, String header) {
 
         try {
+
+            if(header == null || header.isBlank()) {
+                return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
+            }
 
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
             String[] values = userService.authenticateUser(header);
@@ -386,6 +420,10 @@ public class ProductServiceImpl implements ProductService {
 
         try {
 
+            if(header == null || header.isBlank()) {
+                return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
+            }
+
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
             String[] values = userService.authenticateUser(header);
 
@@ -410,7 +448,7 @@ public class ProductServiceImpl implements ProductService {
             }
 
             if(!selectedImage.getProductId().equals(productId)) {
-                return new ResponseEntity<>("Product and image id not related", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Product and image id not related", HttpStatus.FORBIDDEN);
             }
 
             return new ResponseEntity<>(selectedImage, HttpStatus.OK);
@@ -424,6 +462,10 @@ public class ProductServiceImpl implements ProductService {
     public ResponseEntity deleteImage(Integer productId, Integer imageId, String header) {
 
         try {
+
+            if(header == null || header.isBlank()) {
+                return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
+            }
 
             String s3bucketName = s3Configuration.getBucketName();
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
@@ -450,7 +492,7 @@ public class ProductServiceImpl implements ProductService {
             }
 
             if (!selectedImage.getProductId().equals(productId)) {
-                return new ResponseEntity<>("Product and image id not related", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Product and image id not related", HttpStatus.FORBIDDEN);
             }
 
             s3Client.deleteObject(new DeleteObjectRequest(s3bucketName, selectedImage.getS3BucketPath()));

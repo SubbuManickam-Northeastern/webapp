@@ -17,7 +17,7 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity addProduct(@RequestBody ProductDetailsVO productDetails,
-                                     @RequestHeader("Authorization") String header) {
+                                     @RequestHeader(value = "Authorization", required = false) String header) {
         ResponseEntity productData = productService.addProduct(productDetails, header);
         return productData;
     }
@@ -30,48 +30,48 @@ public class ProductController {
 
     @DeleteMapping("/{productId}")
     public ResponseEntity deleteProduct(@PathVariable("productId") Integer productId,
-                                        @RequestHeader("Authorization") String header) {
+                                        @RequestHeader(value = "Authorization", required = false) String header) {
         ResponseEntity deletedProduct = productService.deleteProduct(productId, header);
         return deletedProduct;
     }
 
     @PutMapping("/{productId}")
     public ResponseEntity updateProductPut(@PathVariable("productId") Integer productId,
-                                           @RequestHeader("Authorization") String header, @RequestBody ProductDetailsVO productDetails) {
+                                           @RequestHeader(value = "Authorization", required = false) String header, @RequestBody ProductDetailsVO productDetails) {
         ResponseEntity updatedProduct = productService.updateProductPut(productId, header, productDetails);
         return updatedProduct;
     }
 
     @PatchMapping("/{productId}")
     public ResponseEntity updateProductPatch(@PathVariable("productId") Integer productId,
-                                             @RequestHeader("Authorization") String header, @RequestBody ProductDetailsVO productDetails) {
+                                             @RequestHeader(value = "Authorization", required = false) String header, @RequestBody ProductDetailsVO productDetails) {
         ResponseEntity updatedProduct = productService.updateProductPatch(productId, header, productDetails);
         return updatedProduct;
     }
 
     @PostMapping("/{productId}/image")
-    public ResponseEntity uploadImage(@PathVariable("productId") Integer productId, @RequestHeader("Authorization") String header,
+    public ResponseEntity uploadImage(@PathVariable("productId") Integer productId, @RequestHeader(value = "Authorization", required = false) String header,
                                       @RequestParam("file") MultipartFile productImage) {
         ResponseEntity uploadedImage = productService.uploadImage(productId, header, productImage);
         return uploadedImage;
     }
 
     @GetMapping("/{productId}/image")
-    public ResponseEntity fetchImageList(@PathVariable("productId") Integer productId, @RequestHeader("Authorization") String header) {
+    public ResponseEntity fetchImageList(@PathVariable("productId") Integer productId, @RequestHeader(value = "Authorization", required = false) String header) {
         ResponseEntity imageList = productService.fetchImageList(productId, header);
         return imageList;
     }
 
     @GetMapping("/{productId}/image/{imageId}")
     public ResponseEntity fetchImageDetails(@PathVariable("productId") Integer productId, @PathVariable("imageId") Integer imageId,
-                                            @RequestHeader("Authorization") String header) {
+                                            @RequestHeader(value = "Authorization", required = false) String header) {
         ResponseEntity imageDetails = productService.fetchImageDetails(productId, imageId, header);
         return imageDetails;
     }
 
     @DeleteMapping("/{productId}/image/{imageId}")
     public ResponseEntity deleteImage(@PathVariable("productId") Integer productId, @PathVariable("imageId") Integer imageId,
-                                      @RequestHeader("Authorization") String header) {
+                                      @RequestHeader(value = "Authorization", required = false) String header) {
         ResponseEntity deletedImage = productService.deleteImage(productId, imageId, header);
         return deletedImage;
     }
