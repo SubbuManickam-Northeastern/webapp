@@ -21,13 +21,13 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity getUser(@PathVariable("userId") Integer userId, @RequestHeader("Authorization") String header) {
+    public ResponseEntity getUser(@PathVariable("userId") Integer userId, @RequestHeader(value = "Authorization", required = false) String header) {
         ResponseEntity userData = userService.getUser(userId, header);
         return userData;
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity updateUser(@PathVariable("userId") Integer userId, @RequestHeader("Authorization") String header,
+    public ResponseEntity updateUser(@PathVariable("userId") Integer userId, @RequestHeader(value = "Authorization", required = false) String header,
                                      @RequestBody UserDetailsVO userUpdateDetails) {
         ResponseEntity updateStatus = userService.updateUser(userId, header, userUpdateDetails);
         return updateStatus;

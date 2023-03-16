@@ -80,8 +80,11 @@ public class UserServiceImpl implements UserService {
 
         try {
 
-            String[] values = authenticateUser(header);
+            if(header == null || header.isBlank()) {
+                return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
+            }
 
+            String[] values = authenticateUser(header);
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
                 return new ResponseEntity<>("Unauthorized Access. Enter valid credentials", HttpStatus.UNAUTHORIZED);
@@ -113,8 +116,11 @@ public class UserServiceImpl implements UserService {
 
         try {
 
-            String[] values = authenticateUser(header);
+            if(header == null || header.isBlank()) {
+                return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
+            }
 
+            String[] values = authenticateUser(header);
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
                 return new ResponseEntity<>("Unauthorized Access. Enter valid credentials", HttpStatus.UNAUTHORIZED);
