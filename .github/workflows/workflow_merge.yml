@@ -32,6 +32,9 @@ jobs:
             spring.datasource.driver-class-name=${{ secrets.DRIVER_CLASS }}
             spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
             spring.jpa.hibernate.ddl-auto=update
+            publish.metrics=true
+            metrics.server.hostname=${{ secrets.METRICS_HOSTNAME }}
+            metrics.server.port=${{ secrets.METRICS_PORT }}
           write-mode: append
       
       - name: Set up MySQL

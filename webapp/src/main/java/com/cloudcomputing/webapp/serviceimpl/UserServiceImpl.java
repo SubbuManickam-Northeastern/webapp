@@ -5,6 +5,8 @@ import com.cloudcomputing.webapp.entity.User;
 import com.cloudcomputing.webapp.repository.UserRepository;
 import com.cloudcomputing.webapp.service.UserService;
 import com.cloudcomputing.webapp.vo.UserDetailsVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
 
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
     @Override
     public ResponseEntity createUser(UserDetailsVO userDetails) {
 
@@ -39,10 +43,12 @@ public class UserServiceImpl implements UserService {
             Matcher matcher = emailCheck.matcher(userDetails.getUsername());
 
             if(existingUsers.contains(userDetails.getUsername())) {
+                logger.error("Username already exists in api /createUser");
                 return new ResponseEntity<>("Username already exists", HttpStatus.BAD_REQUEST);
             }
 
             if(!matcher.find()) {
+                logger.error("Invalid Email address in api /createUser");
                 return new ResponseEntity<>("Please enter a valid email address", HttpStatus.BAD_REQUEST);
             }
 
@@ -64,9 +70,11 @@ public class UserServiceImpl implements UserService {
             newUser.setAccountCreated(createdUser.getAccountCreated());
             newUser.setAccountUpdated(createdUser.getAccountUpdated());
 
+            logger.info("User created in api /createUser");
             return new ResponseEntity<>(newUser, HttpStatus.CREATED);
 
         } catch (Exception e) {
+            logger.error("Bad Request in api /createUser");
             return new ResponseEntity<>("Bad Request",HttpStatus.BAD_REQUEST);
         }
 
@@ -81,17 +89,20 @@ public class UserServiceImpl implements UserService {
         try {
 
             if(header == null || header.isBlank()) {
+                logger.error("Unauthorized Access. Provide credentials in api /getUser");
                 return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
             }
 
             String[] values = authenticateUser(header);
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                logger.error("Unauthorized Access. Enter valid credentials in api /getUser");
                 return new ResponseEntity<>("Unauthorized Access. Enter valid credentials", HttpStatus.UNAUTHORIZED);
             }
 
             User loggedUser = userRepository.getByUserId(userId);
             if(!loggedUser.getUsername().equals(values[0])) {
+                logger.error("Forbidden Access. Cannot access other users in api /getUser");
                 return new ResponseEntity<>("Forbidden Access. Cannot access other users", HttpStatus.FORBIDDEN);
             }
 
@@ -102,9 +113,11 @@ public class UserServiceImpl implements UserService {
             userData.setAccountCreated(loggedUser.getAccountCreated());
             userData.setAccountUpdated(loggedUser.getAccountUpdated());
 
+            logger.info("Get User success in api /getUser");
             return new ResponseEntity<>(userData, HttpStatus.OK);
 
         } catch(Exception e) {
+            logger.error("Forbidden Access in api /getUser");
             return new ResponseEntity<>("Forbidden Access", HttpStatus.FORBIDDEN);
         }
     }
@@ -117,25 +130,30 @@ public class UserServiceImpl implements UserService {
         try {
 
             if(header == null || header.isBlank()) {
+                logger.error("Unauthorized Access. Provide credentials in api /updateUser");
                 return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
             }
 
             String[] values = authenticateUser(header);
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                logger.error("Unauthorized Access. Enter valid credentials in api /updateUser");
                 return new ResponseEntity<>("Unauthorized Access. Enter valid credentials", HttpStatus.UNAUTHORIZED);
             }
 
             User loggedUser = userRepository.getByUserId(userId);
             if(loggedUser == null) {
+                logger.error("Not Found. Enter valid user id in api /updateUser");
                 return new ResponseEntity<>("Not Found. Enter valid user id", HttpStatus.NOT_FOUND);
             }
 
             if(!loggedUser.getUsername().equals(values[0])) {
+                logger.error("Forbidden Access in api /updateUser");
                 return new ResponseEntity<>("Forbidden Access", HttpStatus.FORBIDDEN);
             }
 
             if(!loggedUser.getUsername().equals(userUpdateDetails.getUsername())) {
+                logger.error("Bad Request. Username cannot be updated in api /updateUser");
                 return new ResponseEntity<>("Bad Request. Username cannot be updated", HttpStatus.BAD_REQUEST);
             }
 
@@ -148,9 +166,11 @@ public class UserServiceImpl implements UserService {
             loggedUser.setAccountUpdated(updateDate);
             userRepository.save(loggedUser);
 
+            logger.info("Update success in api /updateUser");
             return new ResponseEntity<>("Update Success", HttpStatus.NO_CONTENT);
 
         } catch(Exception e) {
+            logger.error("Unauthorized Access in api /updateUser");
             return new ResponseEntity<>("Unauthorized Access", HttpStatus.UNAUTHORIZED);
         }
     }
