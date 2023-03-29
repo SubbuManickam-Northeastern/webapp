@@ -48,8 +48,8 @@ source "amazon-ebs" "ec2-ami" {
   region        = var.region
   ssh_username  = var.ssh_username
   ami_users     = var.ami_users
-  # access_key    = var.AWS_ACCESS_KEY
-  # secret_key    = var.AWS_SECRET_ACCESS_KEY
+  access_key    = var.AWS_ACCESS_KEY
+  secret_key    = var.AWS_SECRET_ACCESS_KEY
 }
 
 build {
