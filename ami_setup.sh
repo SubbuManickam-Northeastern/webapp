@@ -4,6 +4,10 @@ sudo yum update -y
 sudo yum upgrade -y
 
 
+#Install Cloudwatch Agent
+sudo yum install amazon-cloudwatch-agent -y
+
+
 #Install Java 17
 sudo yum install java-17-amazon-corretto-devel -y
 

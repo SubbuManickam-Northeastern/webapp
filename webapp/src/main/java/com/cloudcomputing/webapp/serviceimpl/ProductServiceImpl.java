@@ -21,6 +21,8 @@ import com.cloudcomputing.webapp.repository.UserRepository;
 import com.cloudcomputing.webapp.service.ProductService;
 import com.cloudcomputing.webapp.vo.ProductDetailsVO;
 import org.apache.tika.Tika;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +54,8 @@ public class ProductServiceImpl implements ProductService {
 
     AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
 
+    private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
+
     @Override
     public ResponseEntity addProduct(ProductDetailsVO productDetails, String header) {
 
@@ -61,6 +65,7 @@ public class ProductServiceImpl implements ProductService {
         try {
 
             if(header == null || header.isBlank()) {
+                logger.error("Unauthorized Access. Provide credentials in api /addProduct");
                 return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
             }
 
@@ -71,6 +76,7 @@ public class ProductServiceImpl implements ProductService {
 
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                logger.error("Unauthorized. Only valid users can create a product in api /addProduct");
                 return new ResponseEntity<>("Unauthorized. Only valid users can create a product", HttpStatus.UNAUTHORIZED);
             }
 
@@ -79,14 +85,17 @@ public class ProductServiceImpl implements ProductService {
                     productDetails.getManufacturer().isBlank() || productDetails.getSku() == null ||
                     productDetails.getDescription() == null || productDetails.getName() == null ||
                     productDetails.getManufacturer() == null) {
+                logger.error("Bad Request. Enter all required fields for creating in api /addProduct");
                 return new ResponseEntity<>("Bad Request. Enter all required fields for creating", HttpStatus.BAD_REQUEST);
             }
 
             if(existingSkus.contains(productDetails.getSku())) {
+                logger.error("Bad Request. Enter unique SKU in api /addProduct");
                 return new ResponseEntity<>("Bad Request. Enter unique SKU", HttpStatus.BAD_REQUEST);
             }
 
             if(productDetails.getQuantity() < 0 || productDetails.getQuantity() > 100) {
+                logger.error("Bad Request. Enter valid quantity in api /addProduct");
                 return new ResponseEntity<>("Bad Request. Enter valid quantity", HttpStatus.BAD_REQUEST);
             }
 
@@ -111,9 +120,11 @@ public class ProductServiceImpl implements ProductService {
             newProduct.setDateLastUpdated(createdProduct.getDateLastUpdated());
             newProduct.setOwnerUserId(createdProduct.getOwnerUserId());
 
+            logger.info("Product Created in api /addProduct");
             return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
 
         } catch (Exception e) {
+            logger.error("Bad Request in api /addProduct");
             return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
         }
     }
@@ -127,7 +138,8 @@ public class ProductServiceImpl implements ProductService {
             Product product = productRepository.getByProductId(productId);
 
             if(product == null) {
-                return new ResponseEntity<>("Product not found. Enter a valid Product Id", HttpStatus.NOT_FOUND);
+                logger.error("Product not found. Enter a valid Product ID in api /getProduct");
+                return new ResponseEntity<>("Product not found. Enter a valid Product ID", HttpStatus.NOT_FOUND);
             }
 
             selectedProduct.setId(product.getId());
@@ -140,9 +152,11 @@ public class ProductServiceImpl implements ProductService {
             selectedProduct.setDateLastUpdated(product.getDateLastUpdated());
             selectedProduct.setOwnerUserId(product.getOwnerUserId());
 
+            logger.info("Get Product success in api /getProduct");
             return new ResponseEntity<>(selectedProduct, HttpStatus.OK);
 
         } catch(Exception e) {
+            logger.error("Bad Request in api /getProduct");
             return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
         }
     }
@@ -153,6 +167,7 @@ public class ProductServiceImpl implements ProductService {
         try {
 
             if(header == null || header.isBlank()) {
+                logger.error("Unauthorized Access. Provide credentials in api /deleteProduct");
                 return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
             }
 
@@ -163,15 +178,18 @@ public class ProductServiceImpl implements ProductService {
 
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                logger.error("Unauthorized. Only authorized users can delete a product in api /deleteProduct");
                 return new ResponseEntity<>("Unauthorized. Only authorized users can delete a product", HttpStatus.UNAUTHORIZED);
             }
 
             if(selectedProduct == null) {
-                return new ResponseEntity<>("Product not found. Enter a valid Product Id", HttpStatus.NOT_FOUND);
+                logger.error("Product not found. Enter a valid Product ID in api /deleteProduct");
+                return new ResponseEntity<>("Product not found. Enter a valid Product ID", HttpStatus.NOT_FOUND);
             }
 
             User loggedUser = userRepository.getByUserId(selectedProduct.getOwnerUserId());
             if(!loggedUser.getUsername().equals(values[0])) {
+                logger.error("Forbidden Access. Only owners can delete a product in api /deleteProduct");
                 return new ResponseEntity<>("Forbidden Access. Only owners can delete a product", HttpStatus.FORBIDDEN);
             }
 
@@ -185,9 +203,11 @@ public class ProductServiceImpl implements ProductService {
 
             productRepository.deleteById(productId);
 
+            logger.info("Delete Successful in api /deleteProduct");
             return new ResponseEntity<>("Delete Successful", HttpStatus.NO_CONTENT);
 
         } catch(Exception e) {
+            logger.error("Bad Request in api /deleteProduct");
             return new ResponseEntity<>("Bad Request" + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -198,6 +218,7 @@ public class ProductServiceImpl implements ProductService {
         try {
 
             if(header == null || header.isBlank()) {
+                logger.error("Unauthorized Access. Provide credentials in api /updateProductPut");
                 return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
             }
 
@@ -208,15 +229,18 @@ public class ProductServiceImpl implements ProductService {
 
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                logger.error("Unauthorized Access. Enter valid credentials in api /updateProductPut");
                 return new ResponseEntity<>("Unauthorized Access. Enter valid credentials", HttpStatus.UNAUTHORIZED);
             }
 
             if(selectedProduct == null) {
-                return new ResponseEntity<>("Product not found. Enter a valid Product Id", HttpStatus.NOT_FOUND);
+                logger.error("Product not found. Enter a valid Product ID in api /updateProductPut");
+                return new ResponseEntity<>("Product not found. Enter a valid Product ID", HttpStatus.NOT_FOUND);
             }
 
             User loggedUser = userRepository.getByUserId(selectedProduct.getOwnerUserId());
             if(!loggedUser.getUsername().equals(values[0])) {
+                logger.error("Forbidden Access. Only owners can update products in api /updateProductPut");
                 return new ResponseEntity<>("Forbidden Access. Only owners can update products", HttpStatus.FORBIDDEN);
             }
 
@@ -225,14 +249,17 @@ public class ProductServiceImpl implements ProductService {
                     productDetails.getManufacturer().isBlank() || productDetails.getSku() == null ||
                     productDetails.getDescription() == null || productDetails.getName() == null ||
                     productDetails.getManufacturer() == null) {
+                logger.error("Bad Request. Enter all fields for updating in api /updateProductPut");
                 return new ResponseEntity<>("Bad Request. Enter all fields for updating", HttpStatus.BAD_REQUEST);
             }
 
             if(existingSkus.contains(productDetails.getSku())) {
+                logger.error("Bad Request. Enter unique SKU in api /updateProductPut");
                 return new ResponseEntity<>("Bad Request. Enter unique SKU", HttpStatus.BAD_REQUEST);
             }
 
             if(productDetails.getQuantity() < 0 || productDetails.getQuantity() > 100) {
+                logger.error("Bad Request. Enter valid quantity in api /updateProductPut");
                 return new ResponseEntity<>("Bad Request. Enter valid quantity", HttpStatus.BAD_REQUEST);
             }
 
@@ -246,9 +273,11 @@ public class ProductServiceImpl implements ProductService {
             selectedProduct.setDateLastUpdated(updateDate);
             productRepository.save(selectedProduct);
 
+            logger.info("Product Updated in api /updateProductPut");
             return new ResponseEntity<>("Product Updated", HttpStatus.NO_CONTENT);
 
         } catch (Exception e) {
+            logger.error("Bad Request in api /updateProductPut");
             return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
         }
     }
@@ -259,6 +288,7 @@ public class ProductServiceImpl implements ProductService {
         try {
 
             if(header == null || header.isBlank()) {
+                logger.error("Unauthorized Access. Provide credentials in api /updateProductPatch");
                 return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
             }
 
@@ -269,23 +299,28 @@ public class ProductServiceImpl implements ProductService {
 
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                logger.error("Unauthorized Access. Enter valid credentials in api /updateProductPatch");
                 return new ResponseEntity<>("Unauthorized Access. Enter valid credentials", HttpStatus.UNAUTHORIZED);
             }
 
             if(selectedProduct == null) {
-                return new ResponseEntity<>("Product not found. Enter a valid Product Id", HttpStatus.NOT_FOUND);
+                logger.error("Product not found. Enter a valid Product ID in api /updateProductPatch");
+                return new ResponseEntity<>("Product not found. Enter a valid Product ID", HttpStatus.NOT_FOUND);
             }
 
             User loggedUser = userRepository.getByUserId(selectedProduct.getOwnerUserId());
             if(!loggedUser.getUsername().equals(values[0])) {
+                logger.error("Forbidden Access. Only owners can update products in api /updateProductPatch");
                 return new ResponseEntity<>("Forbidden Access. Only owners can update products", HttpStatus.FORBIDDEN);
             }
 
             if(existingSkus.contains(productDetails.getSku())) {
+                logger.error("Bad Request. Enter unique SKU in api /updateProductPatch");
                 return new ResponseEntity<>("Bad Request. Enter unique SKU", HttpStatus.BAD_REQUEST);
             }
 
             if(productDetails.getQuantity() != null && (productDetails.getQuantity() < 0 || productDetails.getQuantity() > 100)) {
+                logger.error("Bad Request. Enter valid quantity in api /updateProductPatch");
                 return new ResponseEntity<>("Bad Request. Enter valid quantity", HttpStatus.BAD_REQUEST);
             }
 
@@ -309,9 +344,11 @@ public class ProductServiceImpl implements ProductService {
             selectedProduct.setDateLastUpdated(updateDate);
             productRepository.save(selectedProduct);
 
+            logger.info("Product Updated in api /updateProductPatch");
             return new ResponseEntity<>("Product Updated", HttpStatus.NO_CONTENT);
 
         } catch (Exception e) {
+            logger.error("Bad Request in api /updateProductPatch");
             return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
         }
     }
@@ -322,6 +359,7 @@ public class ProductServiceImpl implements ProductService {
         try {
 
             if(header == null || header.isBlank()) {
+                logger.error("Unauthorized Access. Provide credentials in api /uploadImage");
                 return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
             }
 
@@ -333,6 +371,7 @@ public class ProductServiceImpl implements ProductService {
 
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                logger.error("Unauthorized. Only valid users can upload an image in api /uploadImage");
                 return new ResponseEntity<>("Unauthorized. Only valid users can upload an image", HttpStatus.UNAUTHORIZED);
             }
 
@@ -341,6 +380,7 @@ public class ProductServiceImpl implements ProductService {
 
             String contentType = new Tika().detect(productImage.getInputStream());
             if(!contentType.startsWith("image/")) {
+                logger.error("Invalid image type in api /uploadImage");
                 return new ResponseEntity<>("Invalid image type", HttpStatus.BAD_REQUEST);
             }
 
@@ -373,9 +413,11 @@ public class ProductServiceImpl implements ProductService {
             imageDetails.setDateCreated(uplodedImage.getDateCreated());
             imageDetails.setS3BucketPath(uplodedImage.getS3BucketPath());
 
+            logger.info("Image Created in api /uploadImage");
             return new ResponseEntity<>(imageDetails, HttpStatus.CREATED);
 
         } catch(Exception e) {
+            logger.error("Bad Request in api /uploadImage");
             return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
         }
     }
@@ -386,6 +428,7 @@ public class ProductServiceImpl implements ProductService {
         try {
 
             if(header == null || header.isBlank()) {
+                logger.error("Unauthorized Access. Provide credentials in api /fetchImageList");
                 return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
             }
 
@@ -394,23 +437,28 @@ public class ProductServiceImpl implements ProductService {
 
             User authUser = userRepository.getByUsername(values[0]);
             if(authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                logger.error("Unauthorized. Only valid users can view product images in api /fetchImageList");
                 return new ResponseEntity<>("Unauthorized. Only valid users can view product images", HttpStatus.UNAUTHORIZED);
             }
 
             Product selectedProduct = productRepository.getByProductId(productId);
             if(selectedProduct == null) {
-                return new ResponseEntity<>("Product not found. Enter a valid Product Id", HttpStatus.NOT_FOUND);
+                logger.error("Product not found. Enter a valid Product ID in api /fetchImageList");
+                return new ResponseEntity<>("Product not found. Enter a valid Product ID", HttpStatus.NOT_FOUND);
             }
 
             User loggedUser = userRepository.getByUserId(selectedProduct.getOwnerUserId());
             if(!loggedUser.getUsername().equals(values[0])) {
+                logger.error("Forbidden Access. Only owners can view product images in api /fetchImageList");
                 return new ResponseEntity<>("Forbidden Access. Only owners can view product images", HttpStatus.FORBIDDEN);
             }
 
             List<Image> imageList = imageRepository.getImageListByProduct(productId);
+            logger.info("Fetch Image List success in api /fetchImageList");
             return new ResponseEntity<>(imageList, HttpStatus.OK);
 
         } catch (Exception e) {
+            logger.error("Bad Request in api /fetchImageList");
             return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
         }
     }
@@ -421,6 +469,7 @@ public class ProductServiceImpl implements ProductService {
         try {
 
             if(header == null || header.isBlank()) {
+                logger.error("Unauthorized Access. Provide credentials in api /fetchImageDetails");
                 return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
             }
 
@@ -429,31 +478,38 @@ public class ProductServiceImpl implements ProductService {
 
             User authUser = userRepository.getByUsername(values[0]);
             if (authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                logger.error("Unauthorized. Only valid users can view image details in api /fetchImageDetails");
                 return new ResponseEntity<>("Unauthorized. Only valid users can view image details", HttpStatus.UNAUTHORIZED);
             }
 
             Product selectedProduct = productRepository.getByProductId(productId);
             if (selectedProduct == null) {
-                return new ResponseEntity<>("Product not found. Enter a valid Product Id", HttpStatus.NOT_FOUND);
+                logger.error("Product not found. Enter a valid Product ID in api /fetchImageDetails");
+                return new ResponseEntity<>("Product not found. Enter a valid Product ID", HttpStatus.NOT_FOUND);
             }
 
             Image selectedImage = imageRepository.getByImageId(imageId);
             if (selectedImage == null) {
-                return new ResponseEntity<>("Image not found. Enter a valid Image Id", HttpStatus.NOT_FOUND);
+                logger.error("Image not found. Enter a valid Image ID in api /fetchImageDetails");
+                return new ResponseEntity<>("Image not found. Enter a valid Image ID", HttpStatus.NOT_FOUND);
             }
 
             User loggedUser = userRepository.getByUserId(selectedProduct.getOwnerUserId());
             if (!loggedUser.getUsername().equals(values[0])) {
+                logger.error("Forbidden Access. Only owners can view image details in api /fetchImageDetails");
                 return new ResponseEntity<>("Forbidden Access. Only owners can view image details", HttpStatus.FORBIDDEN);
             }
 
             if(!selectedImage.getProductId().equals(productId)) {
+                logger.error("Product and image id not related in api /fetchImageDetails");
                 return new ResponseEntity<>("Product and image id not related", HttpStatus.FORBIDDEN);
             }
 
+            logger.info("Fetch Image Details success in api /fetchImageDetails");
             return new ResponseEntity<>(selectedImage, HttpStatus.OK);
 
         } catch (Exception e) {
+            logger.error("Bad Request in api /fetchImageDetails");
             return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
         }
     }
@@ -464,6 +520,7 @@ public class ProductServiceImpl implements ProductService {
         try {
 
             if(header == null || header.isBlank()) {
+                logger.error("Unauthorized Access. Provide credentials in api /deleteImage");
                 return new ResponseEntity<>("Unauthorized Access. Provide credentials", HttpStatus.UNAUTHORIZED);
             }
 
@@ -473,25 +530,30 @@ public class ProductServiceImpl implements ProductService {
 
             User authUser = userRepository.getByUsername(values[0]);
             if (authUser == null || !encoder.matches(values[1], authUser.getPassword())) {
+                logger.error("Unauthorized. Only valid users can delete a product in api /deleteImage");
                 return new ResponseEntity<>("Unauthorized. Only valid users can delete a product", HttpStatus.UNAUTHORIZED);
             }
 
             Product selectedProduct = productRepository.getByProductId(productId);
             if (selectedProduct == null) {
-                return new ResponseEntity<>("Product not found. Enter a valid Product Id", HttpStatus.NOT_FOUND);
+                logger.error("Product not found. Enter a valid Product ID in api /deleteImage");
+                return new ResponseEntity<>("Product not found. Enter a valid Product ID", HttpStatus.NOT_FOUND);
             }
 
             Image selectedImage = imageRepository.getByImageId(imageId);
             if (selectedImage == null) {
-                return new ResponseEntity<>("Image not found. Enter a valid Image Id", HttpStatus.NOT_FOUND);
+                logger.error("Image not found. Enter a valid Image ID in api /deleteImage");
+                return new ResponseEntity<>("Image not found. Enter a valid Image ID", HttpStatus.NOT_FOUND);
             }
 
             User loggedUser = userRepository.getByUserId(selectedProduct.getOwnerUserId());
             if (!loggedUser.getUsername().equals(values[0])) {
+                logger.error("Forbidden Access. Only owners can delete images in api /deleteImage");
                 return new ResponseEntity<>("Forbidden Access. Only owners can delete images", HttpStatus.FORBIDDEN);
             }
 
             if (!selectedImage.getProductId().equals(productId)) {
+                logger.error("Product and image id not related in api /deleteImage");
                 return new ResponseEntity<>("Product and image id not related", HttpStatus.FORBIDDEN);
             }
 
@@ -499,9 +561,11 @@ public class ProductServiceImpl implements ProductService {
 
             imageRepository.deleteById(imageId);
 
+            logger.info("Delete success in api /deleteImage");
             return new ResponseEntity<>("Deleted Successfully", HttpStatus.NO_CONTENT);
 
         } catch (Exception e) {
+            logger.error("Bad Request in api /deleteImage");
             return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
         }
     }

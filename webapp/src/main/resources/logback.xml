@@ -1,0 +1,14 @@
+<configuration>
+    <property name="LOG_DIR" value="/tmp" />
+<!--    <property name="LOG_DIR" value="C:\Users\Asus\Desktop\Config_Doubts" />-->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/csye6225_webapp.log</file>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="FILE" />
+    </root>
+</configuration>
