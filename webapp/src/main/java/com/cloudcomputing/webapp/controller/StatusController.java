@@ -30,7 +30,7 @@ public class StatusController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @GetMapping("review")
+    @GetMapping("cicd")
     public ResponseEntity getReviewStatus() {
         logger.info("Success in api /review");
         return new ResponseEntity(HttpStatus.OK);
