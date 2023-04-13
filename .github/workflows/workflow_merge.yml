@@ -4,6 +4,8 @@ on:
   pull_request:
     types:
       - closed
+env:
+  AMI_ID : ""
 
 jobs:
   if_merged:
@@ -48,14 +50,34 @@ jobs:
       - name: Build with Maven
         run: mvn -f /home/runner/work/webapp/webapp/webapp/pom.xml clean install
 
+      - name: Configure AWS Credentials for DEV CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_DEV_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
       - name: Packer Init
-        uses: hashicorp/packer-github-actions@master
-        with:
-          command: init
-          target: ami-config.pkr.hcl
+        run: packer init .
+        
+      - name: Packer Validate
+        run: packer validate .
 
-      - uses: hashicorp/packer-github-actions@master
+      - name: Packer Build
+        run: echo "AMI_ID = $(packer build -machine-readable . | awk -F, '$0 ~/artifact,0,id/ {print $6}')" >> $GITHUB_ENV
+        
+      - name: Add AWS Credentials for DEMO CLI
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          command: build
-          arguments: -var=AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} -var=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          target: ami-config.pkr.hcl
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
+      - name: Create New Launch Template with AMI
+        run: aws ec2 create-launch-template-version --launch-template-id ${{secrets.LAUNCH_TEMPLATE_ID}} --source-version '$Latest' --launch-template-data '{"ImageId":"'$(echo ${{env.AMI_ID}} | sed 's/.*://')'"}'
+        
+      - name: Update Auto Scaling Group with new ID
+        run: aws autoscaling update-auto-scaling-group --auto-scaling-group-name ${{secrets.ASG_NAME}} --launch-template LaunchTemplateName=${{secrets.LAUNCH_TEMPLATE_NAME}},Version='$Latest'
+
+      - name: Start Instance Refresh
+        run: aws autoscaling start-instance-refresh --auto-scaling-group-name ${{secrets.ASG_NAME}}
