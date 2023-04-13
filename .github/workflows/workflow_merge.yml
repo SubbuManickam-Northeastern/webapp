@@ -5,7 +5,7 @@ on:
     types:
       - closed
 env:
-  AMI_ID : ""
+  AMI_ID: ""
 
 jobs:
   if_merged:
@@ -64,7 +64,7 @@ jobs:
         run: packer validate .
 
       - name: Packer Build
-        run: echo "AMI_ID = $(packer build -machine-readable . | awk -F, '$0 ~/artifact,0,id/ {print $6}')" >> $GITHUB_ENV
+        run: echo "AMI_ID=$(packer build -machine-readable . | awk -F, '$0 ~/artifact,0,id/ {print $6}')" >> $GITHUB_ENV
         
       - name: Add AWS Credentials for DEMO CLI
         uses: aws-actions/configure-aws-credentials@v1
