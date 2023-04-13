@@ -29,4 +29,10 @@ public class StatusController {
         logger.info("Success in api /healthz");
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @GetMapping("review")
+    public ResponseEntity getReviewStatus() {
+        logger.info("Success in api /review");
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }
